@@ -6,6 +6,9 @@ from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework import status
+from rest_framework import generics, permissions
+from .models import CustomUser
+from .serializers import UserProfileSerializer
 
 
 User = get_user_model()  # Get the correct user model
@@ -67,3 +70,22 @@ def login(request):
 def dashboard(request):
     print("In Dashboad")
     return Response({'message': 'Welcome to your dashboard'})
+
+
+
+
+class UserProfileView(generics.RetrieveUpdateAPIView):
+    queryset = CustomUser.objects.all()
+    serializer_class = UserProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user
+
+    def put(self, request, *args, **kwargs):
+        user = self.get_object()
+        serializer = self.get_serializer(user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'Profile updated successfully', 'data': serializer.data})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
