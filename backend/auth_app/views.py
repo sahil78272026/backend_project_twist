@@ -1,29 +1,66 @@
-from rest_framework.decorators import api_view, authentication_classes, permission_classes
-from rest_framework.response import Response
+# import from django
+from django.core.files.storage import default_storage
 from django.contrib.auth import get_user_model, authenticate
 from django.contrib.auth.hashers import make_password
+
+#import from drf
+from rest_framework.decorators import api_view, authentication_classes, permission_classes
+from rest_framework.response import Response
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework import status
 from rest_framework import generics, permissions
-from .models import CustomUser
-from .serializers import UserProfileSerializer
 
+#local imports
+from .models import CustomUser
+from .serializers import UserProfileSerializer, ProfileSerializer
 
 User = get_user_model()  # Get the correct user model
 
 
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def get_user_profile(request):
+    """Fetch the logged-in user's profile"""
+    user = request.user
+    print("user :", user)
+    serializer = UserProfileSerializer(user)  # ✅ Use the serializer to return user data
+    print(serializer.data)
+    return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 @api_view(['POST'])
-@authentication_classes([TokenAuthentication])
+@permission_classes([IsAuthenticated])
+def upload_profile_image(request):
+    """Upload a profile image for the logged-in user"""
+    user = request.user # ✅ This is the User Profile object (instance of CustomUser)
+
+    if 'profile_image' not in request.FILES:
+        return Response({"error": "No image uploaded"}, status=status.HTTP_400_BAD_REQUEST)
+
+    image = request.FILES['profile_image']
+
+    # Save image to user profile
+    user.profile_image = image
+    user.save()
+
+    return Response({
+        "message": "Profile image uploaded successfully",
+        "profile_image": user.profile_image.url
+    }, status=status.HTTP_200_OK)
+
+
+@api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def logout(request):
-    # Get the token of the current user
-    token = Token.objects.get(user=request.user)
-    print("token in logout" ,token)
-    token.delete()  # Invalidate the token
-    return Response({"message": "Successfully logged out"}, status=status.HTTP_200_OK)
-
+    """Log the user out by deleting the token"""
+    try:
+        token = Token.objects.get(user=request.user)
+        token.delete()
+        return Response({"message": "Logged out successfully"}, status=200)
+    except Token.DoesNotExist:
+        return Response({"error": "Invalid token"}, status=400)
 
 @api_view(['POST'])
 def signup(request):
@@ -72,6 +109,33 @@ def dashboard(request):
     return Response({'message': 'Welcome to your dashboard'})
 
 
+
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def user_profiles(request):
+    """Get all profiles except the logged-in user"""
+    User = get_user_model()
+    profiles = User.objects.exclude(id=request.user.id)
+    serializer = ProfileSerializer(profiles, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['GET', 'PUT'])
+@permission_classes([IsAuthenticated])
+def user_profile(request):
+    """Get and update the current user's profile"""
+    if request.method == 'GET':
+        serializer = ProfileSerializer(request.user)
+        return Response(serializer.data)
+
+    if request.method == 'PUT':
+        serializer = ProfileSerializer(request.user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
 
 
 class UserProfileView(generics.RetrieveUpdateAPIView):

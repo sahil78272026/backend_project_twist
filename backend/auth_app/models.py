@@ -1,5 +1,4 @@
 from django.contrib.auth.models import AbstractUser
-from django.contrib.auth import get_user_model
 from django.db import models
 
 
@@ -9,6 +8,7 @@ class CustomUser(AbstractUser):
     age = models.IntegerField(blank=True, null=True)
     gender = models.CharField(max_length=10, blank=True, null=True)
     mobile_number = models.CharField(max_length=15, blank=True, null=True)
+    profile_image = models.ImageField(upload_to='profile_images/', blank=True, null=True)
     groups = models.ManyToManyField(
         "auth.Group",
         related_name="customuser_set",    # Avoids conflict with default 'user_set'
