@@ -128,6 +128,8 @@ def user_profile(request):
     """Get and update the current user's profile"""
     if request.method == 'GET':
         serializer = ProfileSerializer(request.user)
+        print("In user profile GET method block")
+        print("serializer :", serializer.data)
         return Response(serializer.data)
 
     if request.method == 'PUT':
@@ -153,3 +155,24 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
             serializer.save()
             return Response({'message': 'Profile updated successfully', 'data': serializer.data})
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def search_profiles(request):
+    """Search for users based on age and location"""
+    min_age = request.GET.get('min_age')
+    max_age = request.GET.get('max_age')
+    location = request.GET.get('location')
+
+    users = CustomUser.objects.all()
+
+    if min_age:
+        users = users.filter(age__gte=min_age)  # Age greater than or equal to min_age
+    if max_age:
+        users = users.filter(age__lte=max_age)  # Age less than or equal to max_age
+    if location:
+        users = users.filter(location__icontains=location)  # Case-insensitive location match
+
+    serializer = UserProfileSerializer(users, many=True)
+    return Response(serializer.data)
