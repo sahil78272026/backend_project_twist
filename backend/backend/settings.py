@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-@5sn)wk6e+q7lgo9fd+$7m%+r3+bqcnj)zo8c14%y+mhvvach6
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -58,6 +58,7 @@ MIDDLEWARE = [
 # Allow requests from localhost (your React frontend)
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",    # React frontend
+    "https://xc689h8-sahilg045-8081.exp.direct" # react native web
 ]
 
 # Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
