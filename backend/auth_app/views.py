@@ -102,8 +102,8 @@ def login(request):
 
 
 @api_view(['GET'])
-@authentication_classes([TokenAuthentication])  # Ensure Token Authentication is used
-@permission_classes([IsAuthenticated])
+# @authentication_classes([TokenAuthentication])  # Ensure Token Authentication is used
+# @permission_classes([IsAuthenticated])
 def dashboard(request):
     print("In Dashboad")
     return Response({'message': 'Welcome to your dashboard'})

@@ -26,7 +26,14 @@ SECRET_KEY = 'django-insecure-@5sn)wk6e+q7lgo9fd+$7m%+r3+bqcnj)zo8c14%y+mhvvach6
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    '*',
+    'https://j75heui-sahilg045-8081.exp.direct/',
+    'http://192.168.29.217:8081',
+    'http://localhost:8081',
+    'http://127.0.0.1:8000',
+    'http://127.0.0.1:5500'
+]
 
 
 # Application definition
@@ -58,7 +65,8 @@ MIDDLEWARE = [
 # Allow requests from localhost (your React frontend)
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:5173",    # React frontend
-    "https://xc689h8-sahilg045-8081.exp.direct" # react native web
+    "https://xc689h8-sahilg045-8081.exp.direct", # react native web
+    "http://127.0.0.1:5500"
 ]
 
 # Allow all HTTP methods (GET, POST, PUT, DELETE, etc.)
@@ -123,6 +131,8 @@ DATABASES = {
         'NAME': 'twist_db',                         # PostgreSQL database name
     }
 }
+
+# PG ADMIN MASTER PASSWORD: ZA
 
 AUTH_USER_MODEL = 'auth_app.CustomUser'
 
